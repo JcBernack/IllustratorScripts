@@ -9,7 +9,7 @@
     for (var i = selection.length-1; i >= 0; i--) {
         selection[i].name = baseName + index++;
     }
-    alert("Renamed " + index + " elements.", "Success");
+    alert("Renamed " + selection.length + " elements.", "Success");
 } catch(e) {
     alert("Error: " + e.message);
 }
