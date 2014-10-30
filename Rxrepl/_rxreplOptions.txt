@@ -1,0 +1,2 @@
+-s "font-family:'([^']*)';" -r "font-family:\1;"
+-s "ArialMT" -r "Arial"
