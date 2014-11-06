@@ -1,15 +1,14 @@
 ﻿try {
     // check if any documents are open
     if (app.documents.length == 0) throw new Error("No open documents.");
-    // check if rxrepl.exe is found
-    var rxrepl = new File("../rxrepl.exe");
-    if (!rxrepl.exists) throw new Error("rxrepl.exe was not found at: " + rxrepl.fullName);
     // set up save options
     var options = new ExportOptionsSVG();
     options.fontSubsetting = SVGFontSubsetting.None;
     options.fontType = SVGFontType.SVGFONT;
-    // get handle to batch file
-    var batch = new File("run_rxrepl.bat");
+    // prepare regular expressions
+    var regenechsen = new Array();
+    regenechsen[0] = { expression: /font-family:'([^']*)';/g, replace: "font-family:$1;" };
+    regenechsen[1] = { expression: /ArialMT/g, replace: "Arial" };
     // save all documents as svg
     var n = app.documents.length;
     for (var i = n-1; i >= 0; i--) {
@@ -17,23 +16,25 @@
         // save current document
         doc.save();
         // export document to svg
-        var exportFile = new File(doc.name.substr(0, doc.name.lastIndexOf('.')));
+        var orgFilename = new String(doc.fullName);
+        var exportFile = new File(orgFilename.substr(0, orgFilename.lastIndexOf('.')) + ".svg");
         doc.exportFile(exportFile, ExportType.SVG, options);
-        var svgName = doc.name;
         // close the document to prevent accidentally editing the svg instead of the ai file
         doc.close(SaveOptions.DONOTSAVECHANGES);
-        // fix svg fonts
-        // alter: modify file in-place, i.e. input file is output file
-        // no-backup don't create backup file
-        // options: read the replace options from file ..\\_rxreplOptions.txt
-        batch.open("w");
-        batch.writeln("..\\rxrepl.exe --alter --no-backup --options ..\\_rxreplOptions.txt --file " + svgName);
-        batch.close();
-        batch.execute();
+        // read all contents of the svg file
+        exportFile.open("r");
+        var svgContent = exportFile.read();
+        exportFile.close();
+        // string replace with regular expressions
+        for (var j = 0; j < regenechsen.length; j++) {
+            svgContent =svgContent.replace(regenechsen[j].expression, regenechsen[j].replace);
+        }
+        // overwrite svg with results
+        exportFile.open("w");
+        exportFile.write(svgContent);
+        exportFile.close();
     }
-    alert("Saved " + n + " files as SVG.", "Success!");    
-    // delete the batch file
-    batch.remove();
+    alert("Saved " + n + " files as SVG.", "Success!");
 } catch (e) {
     alert("Error: " + e.message);
 }
