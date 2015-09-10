@@ -7,8 +7,9 @@
     options.fontType = SVGFontType.SVGFONT;
     // prepare regular expressions
     var regenechsen = new Array();
-    regenechsen[0] = { expression: /font-family:'([^']*)';/g, replace: "font-family:$1;" };
-    regenechsen[1] = { expression: /ArialMT/g, replace: "Arial" };
+    regenechsen.push({ expression: /font-family:'([^']*)';/g, replace: "font-family:$1;" });
+    regenechsen.push({ expression: /ArialMT/g, replace: "Arial" });
+    regenechsen.push({ expression: /Arial-BoldMT/g, replace: "Arial; font-weight: bold" });
     // save all documents as svg
     var n = app.documents.length;
     for (var i = n-1; i >= 0; i--) {
